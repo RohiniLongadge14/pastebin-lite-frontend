@@ -34,9 +34,8 @@ function App() {
           "https://pastebin-lite--rohinilon875.replit.app" + data.url
         );
       }
-    } catch (e) {
-  console.error(e);
-  alert("Backend is sleeping or blocked. Please try again in 5 seconds.");
+    } catch (err) {
+      console.log(err);
     } finally {
       setLoading(false);
     }
