@@ -6,24 +6,19 @@ function App() {
   const [pasteUrl, setPasteUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const createPaste = async () => {
+    if (!content.trim()) {
+      alert("Please enter some text");
+      return;
+    }
 
- const createPaste = async () => {
-  if (!content.trim()) {
-    alert("Please enter some text");
-    return;
-  }
+    setLoading(true);
+    setPasteUrl("");
 
-  setLoading(true);
-  setPasteUrl("");
-
-  const backendBase = "https://pastebin-lite--rohinilon875.replit.app";
-
-  try {
-    // Retry logic (up to 5 attempts)
-    let response;
-    for (let i = 0; i < 5; i++) {
-      try {
-        response = await fetch(`${backendBase}/api/pastes`, {
+    try {
+      const response = await fetch(
+        "https://pastebin-lite--rohinilon875.replit.app/api/pastes",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -32,34 +27,30 @@ function App() {
             content,
             maxViews: 5,
           }),
-        });
+        }
+      );
 
-        if (response.ok) break;
-      } catch (e) {
-        await new Promise((res) => setTimeout(res, 4000));
+      if (!response.ok) {
+        throw new Error("Failed to create paste");
       }
+
+      const data = await response.json();
+
+      // ✅ BACKEND RETURNS "url", NOT "id"
+      if (data?.url) {
+        setPasteUrl(
+          "https://pastebin-lite--rohinilon875.replit.app" + data.url
+        );
+      } else {
+        alert("Paste created but URL not returned");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Backend unavailable. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    if (!response || !response.ok) {
-      alert("Backend is waking up. Please click Create Paste again.");
-      return;
-    }
-
-    const data = await response.json();
-
-    if (data?.id) {
-      setPasteUrl(`${backendBase}/p/${data.id}`);
-    } else {
-      alert("Unexpected backend response");
-    }
-  } catch (err) {
-    alert("Backend unavailable. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   return (
     <div className="app-container">
