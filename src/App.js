@@ -13,7 +13,7 @@ function App() {
     setPasteUrl("");
 
     try {
-      const res = await fetch(
+      const response = await fetch(
         "https://pastebin-lite--rohinilon875.replit.app/api/pastes",
         {
           method: "POST",
@@ -27,15 +27,19 @@ function App() {
         }
       );
 
-      const data = await res.json();
+      const data = await response.json();
+      console.log("Backend response:", data);
 
-      if (data?.url) {
-        setPasteUrl(
-          "https://pastebin-lite--rohinilon875.replit.app" + data.url
-        );
+      // ✅ CORRECT LINK GENERATION
+      if (data && data.id) {
+        const fullUrl = `https://pastebin-lite--rohinilon875.replit.app/p/${data.id}`;
+        setPasteUrl(fullUrl);
+      } else {
+        alert("Paste created but ID not returned");
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to connect to backend");
     } finally {
       setLoading(false);
     }
@@ -45,6 +49,7 @@ function App() {
     <div className="app-container">
       <div className="card">
         <h1>Pastebin Lite</h1>
+
         <p className="subtitle">
           Lightweight Pastebin-style app built with React & Spring Boot
         </p>
@@ -62,6 +67,7 @@ function App() {
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>
+            <br />
             <a href={pasteUrl} target="_blank" rel="noreferrer">
               {pasteUrl}
             </a>
