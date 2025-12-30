@@ -1,6 +1,9 @@
 import { useState } from "react";
 import "./App.css";
 
+// ✅ HARD-CODE BACKEND URL (NO ENV ISSUES)
+const API_BASE = "https://pastebin-lite--rohinilon875.replit.app";
+
 function App() {
   const [content, setContent] = useState("");
   const [pasteUrl, setPasteUrl] = useState("");
@@ -16,37 +19,33 @@ function App() {
     setPasteUrl("");
 
     try {
-      const response = await fetch(
-        "https://pastebin-lite--rohinilon875.replit.app/api/pastes",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content,
-            maxViews: 5,
-          }),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/pastes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+          maxViews: 5,
+        }),
+      });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to create paste");
       }
 
-      const data = await response.json();
+      const data = await res.json();
 
-      // ✅ BACKEND RETURNS "url", NOT "id"
-      if (data?.url) {
-        setPasteUrl(
-          "https://pastebin-lite--rohinilon875.replit.app" + data.url
-        );
+      // ✅ THIS IS WHAT GENERATES THE LINK
+      if (data && data.id) {
+        const finalUrl = `${API_BASE}/p/${data.id}`;
+        setPasteUrl(finalUrl);
       } else {
-        alert("Paste created but URL not returned");
+        alert("Paste created but ID missing");
       }
     } catch (err) {
       console.error(err);
-      alert("Backend unavailable. Please try again.");
+      alert("Backend not responding. Try again in 5 seconds.");
     } finally {
       setLoading(false);
     }
