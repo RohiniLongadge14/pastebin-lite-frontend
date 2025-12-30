@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./App.css";
 
-// ✅ BACKEND URL (Replit)
 const API_BASE = "https://pastebin-lite--rohinilon875.replit.app";
 
 function App() {
@@ -21,27 +20,17 @@ function App() {
     try {
       const res = await fetch(`${API_BASE}/api/pastes`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: content,
-          maxViews: 5,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, maxViews: 5 }),
       });
 
-      if (!res.ok) {
-        throw new Error("Backend error");
-      }
-
       const data = await res.json();
-      console.log("Backend response:", data);
+      console.log("API RESPONSE:", data);
 
-      // ✅ FINAL LINK (backend link)
       if (data.url) {
-        setPasteUrl(`${API_BASE}${data.url}`);
+        setPasteUrl(API_BASE + data.url);
       } else {
-        alert("Paste created but URL not returned");
+        alert("Paste created but URL missing");
       }
     } catch (err) {
       console.error(err);
