@@ -29,7 +29,7 @@ function App() {
       }
 
       const data = await res.json();
-
+      console.log("Backend response:", data);
       // ✅ USE BACKEND URL DIRECTLY (THIS IS THE FIX)
       if (data.url) {
         setPasteUrl(`${API_BASE}${data.url}`);
