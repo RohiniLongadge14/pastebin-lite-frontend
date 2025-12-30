@@ -18,7 +18,7 @@ function App() {
     setPasteUrl("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/pastes`, {
+      const response = await fetch(`${API_BASE}/api/pastes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,15 +29,15 @@ function App() {
         }),
       });
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error("Backend error");
       }
 
-      const data = await res.json();
+      const data = await response.json();
 
-      // ✅ BACKEND RETURNS id + url
-      if (data.id) {
-        setPasteUrl(`${API_BASE}/p/${data.id}`);
+      // ✅ USE BACKEND-RETURNED URL (CRITICAL FIX)
+      if (data.url) {
+        setPasteUrl(`${API_BASE}${data.url}`);
       } else {
         alert("Paste created but URL not returned");
       }
@@ -53,6 +53,7 @@ function App() {
     <div className="app-container">
       <div className="card">
         <h1>Pastebin Lite</h1>
+
         <p className="subtitle">
           Lightweight Pastebin-style app built with React & Spring Boot
         </p>
@@ -67,6 +68,7 @@ function App() {
           {loading ? "Creating..." : "Create Paste"}
         </button>
 
+        {/* ✅ LINK WILL ALWAYS SHOW HERE */}
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>

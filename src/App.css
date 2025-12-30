@@ -47,13 +47,8 @@ textarea {
   font-size: 15px;
   resize: vertical;
   outline: none;
-  background-color: #f8fafc;   /* light background */
-  color: #1f2937;              /* dark text */
-  font-weight: 500;
-}
-
-textarea::placeholder {
-  color: #6b7280;
+  background-color: #f8fafc;
+  color: #1f2937;
 }
 
 textarea:focus {
@@ -61,7 +56,6 @@ textarea:focus {
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
-
 
 button {
   margin-top: 16px;
@@ -72,7 +66,6 @@ button {
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
 button:hover {
