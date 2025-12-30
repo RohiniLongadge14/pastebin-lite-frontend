@@ -13,16 +13,19 @@ function App() {
     setPasteUrl("");
 
     try {
-      const res = await fetch("/api/pastes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: content,
-          maxViews: 5,
-        }),
-      });
+      const res = await fetch(
+        "https://pastebin-lite--rohinilon875.replit.app/api/pastes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: content,
+            maxViews: 5,
+          }),
+        }
+      );
 
       const data = await res.json();
 
@@ -33,6 +36,7 @@ function App() {
       }
     } catch (e) {
       console.error(e);
+      alert("Failed to connect to backend");
     } finally {
       setLoading(false);
     }
