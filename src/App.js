@@ -1,8 +1,6 @@
 import { useState } from "react";
 import "./App.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL;
-
 function App() {
   const [content, setContent] = useState("");
   const [pasteUrl, setPasteUrl] = useState("");
@@ -10,7 +8,7 @@ function App() {
 
   const createPaste = async () => {
     if (!content.trim()) {
-      alert("Please enter some text");
+      alert("Please enter some content");
       return;
     }
 
@@ -18,28 +16,35 @@ function App() {
     setPasteUrl("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/pastes`, {
+      // ✅ RELATIVE API CALL
+      const res = await fetch("/api/pastes", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, maxViews: 5 }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: content,
+          maxViews: 5,
+        }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create paste");
+        throw new Error("Backend error");
       }
 
       const data = await res.json();
       console.log("Backend response:", data);
-      // ✅ USE BACKEND URL DIRECTLY (THIS IS THE FIX)
-      if (data.url) {
-        setPasteUrl(`${API_BASE}${data.url}`);
-      } else {
-        alert("Paste created but URL missing");
-      }
 
-    } catch (e) {
-      console.error(e);
-      alert("Paste created but frontend failed to read response");
+      // ✅ BACKEND RETURNS { id, url }
+      if (data.url) {
+        // ✅ url already = /p/{id}
+        setPasteUrl(data.url);
+      } else {
+        alert("Paste created but URL not returned");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Backend not responding. Try again in 5 seconds.");
     } finally {
       setLoading(false);
     }
