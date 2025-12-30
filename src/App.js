@@ -1,8 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
-// ✅ HARD-CODE BACKEND URL (NO ENV ISSUES)
-const API_BASE = "https://pastebin-lite--rohinilon875.replit.app";
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 function App() {
   const [content, setContent] = useState("");
@@ -11,7 +10,7 @@ function App() {
 
   const createPaste = async () => {
     if (!content.trim()) {
-      alert("Please enter some text");
+      alert("Please enter content");
       return;
     }
 
@@ -30,21 +29,18 @@ function App() {
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to create paste");
-      }
-
       const data = await res.json();
 
-      // ✅ THIS IS WHAT GENERATES THE LINK
-      if (data && data.id) {
-        const finalUrl = `${API_BASE}/p/${data.id}`;
+      if (data && (data.url || data.id)) {
+        const finalUrl = data.url
+          ? `${API_BASE}${data.url}`
+          : `${API_BASE}/p/${data.id}`;
+
         setPasteUrl(finalUrl);
       } else {
-        alert("Paste created but ID missing");
+        alert("Paste created but URL not returned");
       }
     } catch (err) {
-      console.error(err);
       alert("Backend not responding. Try again in 5 seconds.");
     } finally {
       setLoading(false);
