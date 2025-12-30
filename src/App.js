@@ -10,7 +10,7 @@ function App() {
 
   const createPaste = async () => {
     if (!content.trim()) {
-      alert("Please enter some text");
+      alert("Please enter some content");
       return;
     }
 
@@ -18,17 +18,7 @@ function App() {
     setPasteUrl("");
 
     try {
-      // 🔹 STEP 1: Wake up backend (Replit cold start)
-      await fetch(`${API_BASE}/api/healthz`, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      // 🔹 STEP 2: Wait for backend to fully start
-      await new Promise((resolve) => setTimeout(resolve, 8000));
-
-      // 🔹 STEP 3: Create paste
-      const response = await fetch(`${API_BASE}/api/pastes`, {
+      const res = await fetch(`${API_BASE}/api/pastes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,26 +29,21 @@ function App() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Paste API failed");
+      if (!res.ok) {
+        throw new Error("Backend error");
       }
 
-      const data = await response.json();
+      const data = await res.json();
 
-      // 🔹 STEP 4: Extract ID safely
-      const pasteId =
-        data.id || (data.url && data.url.split("/").pop());
-
-      if (!pasteId) {
-        throw new Error("Paste ID not returned");
+      // ✅ BACKEND RETURNS id + url
+      if (data.id) {
+        setPasteUrl(`${API_BASE}/p/${data.id}`);
+      } else {
+        alert("Paste created but URL not returned");
       }
-
-      // 🔹 STEP 5: Generate final link
-      setPasteUrl(`${API_BASE}/p/${pasteId}`);
     } catch (error) {
-      alert(
-        "Backend is waking up. Please wait 10 seconds and click Create Paste again."
-      );
+      console.error(error);
+      alert("Backend not responding. Try again in 5 seconds.");
     } finally {
       setLoading(false);
     }
@@ -68,7 +53,6 @@ function App() {
     <div className="app-container">
       <div className="card">
         <h1>Pastebin Lite</h1>
-
         <p className="subtitle">
           Lightweight Pastebin-style app built with React & Spring Boot
         </p>
@@ -83,7 +67,6 @@ function App() {
           {loading ? "Creating..." : "Create Paste"}
         </button>
 
-        {/* ✅ LINK WILL SHOW HERE */}
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>
