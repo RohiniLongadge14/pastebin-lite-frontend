@@ -10,7 +10,7 @@ function App() {
 
   const createPaste = async () => {
     if (!content.trim()) {
-      alert("Please enter some content");
+      alert("Please enter some text");
       return;
     }
 
@@ -18,32 +18,28 @@ function App() {
     setPasteUrl("");
 
     try {
-      const response = await fetch(`${API_BASE}/api/pastes`, {
+      const res = await fetch(`${API_BASE}/api/pastes`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: content,
-          maxViews: 5,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, maxViews: 5 }),
       });
 
-      if (!response.ok) {
-        throw new Error("Backend error");
+      if (!res.ok) {
+        throw new Error("Failed to create paste");
       }
 
-      const data = await response.json();
+      const data = await res.json();
 
-      // ✅ USE BACKEND-RETURNED URL (CRITICAL FIX)
+      // ✅ USE BACKEND URL DIRECTLY (THIS IS THE FIX)
       if (data.url) {
         setPasteUrl(`${API_BASE}${data.url}`);
       } else {
-        alert("Paste created but URL not returned");
+        alert("Paste created but URL missing");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Backend not responding. Try again in 5 seconds.");
+
+    } catch (e) {
+      console.error(e);
+      alert("Paste created but frontend failed to read response");
     } finally {
       setLoading(false);
     }
@@ -53,7 +49,6 @@ function App() {
     <div className="app-container">
       <div className="card">
         <h1>Pastebin Lite</h1>
-
         <p className="subtitle">
           Lightweight Pastebin-style app built with React & Spring Boot
         </p>
@@ -68,7 +63,6 @@ function App() {
           {loading ? "Creating..." : "Create Paste"}
         </button>
 
-        {/* ✅ LINK WILL ALWAYS SHOW HERE */}
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>
