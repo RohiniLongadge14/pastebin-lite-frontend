@@ -10,7 +10,7 @@ function App() {
 
   const createPaste = async () => {
     if (!content.trim()) {
-      alert("Please enter content");
+      alert("Please enter some text");
       return;
     }
 
@@ -18,30 +18,47 @@ function App() {
     setPasteUrl("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/pastes`, {
+      // 🔹 STEP 1: Wake up backend (Replit cold start)
+      await fetch(`${API_BASE}/api/healthz`, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      // 🔹 STEP 2: Wait for backend to fully start
+      await new Promise((resolve) => setTimeout(resolve, 8000));
+
+      // 🔹 STEP 3: Create paste
+      const response = await fetch(`${API_BASE}/api/pastes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content,
+          content: content,
           maxViews: 5,
         }),
       });
 
-      const data = await res.json();
-
-      if (data && (data.url || data.id)) {
-        const finalUrl = data.url
-          ? `${API_BASE}${data.url}`
-          : `${API_BASE}/p/${data.id}`;
-
-        setPasteUrl(finalUrl);
-      } else {
-        alert("Paste created but URL not returned");
+      if (!response.ok) {
+        throw new Error("Paste API failed");
       }
-    } catch (err) {
-      alert("Backend not responding. Try again in 5 seconds.");
+
+      const data = await response.json();
+
+      // 🔹 STEP 4: Extract ID safely
+      const pasteId =
+        data.id || (data.url && data.url.split("/").pop());
+
+      if (!pasteId) {
+        throw new Error("Paste ID not returned");
+      }
+
+      // 🔹 STEP 5: Generate final link
+      setPasteUrl(`${API_BASE}/p/${pasteId}`);
+    } catch (error) {
+      alert(
+        "Backend is waking up. Please wait 10 seconds and click Create Paste again."
+      );
     } finally {
       setLoading(false);
     }
@@ -66,6 +83,7 @@ function App() {
           {loading ? "Creating..." : "Create Paste"}
         </button>
 
+        {/* ✅ LINK WILL SHOW HERE */}
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>
