@@ -35,8 +35,8 @@ function App() {
         );
       }
     } catch (e) {
-      console.error(e);
-      alert("Failed to connect to backend");
+  console.error(e);
+  alert("Backend is sleeping or blocked. Please try again in 5 seconds.");
     } finally {
       setLoading(false);
     }
