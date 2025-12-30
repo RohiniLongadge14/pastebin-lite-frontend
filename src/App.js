@@ -6,44 +6,60 @@ function App() {
   const [pasteUrl, setPasteUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const createPaste = async () => {
-    if (!content.trim()) return;
 
-    setLoading(true);
-    setPasteUrl("");
+ const createPaste = async () => {
+  if (!content.trim()) {
+    alert("Please enter some text");
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        "https://pastebin-lite--rohinilon875.replit.app/api/pastes",
-        {
+  setLoading(true);
+  setPasteUrl("");
+
+  const backendBase = "https://pastebin-lite--rohinilon875.replit.app";
+
+  try {
+    // Retry logic (up to 5 attempts)
+    let response;
+    for (let i = 0; i < 5; i++) {
+      try {
+        response = await fetch(`${backendBase}/api/pastes`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            content: content,
+            content,
             maxViews: 5,
           }),
-        }
-      );
+        });
 
-      const data = await response.json();
-      console.log("Backend response:", data);
-
-      // ✅ CORRECT LINK GENERATION
-      if (data && data.id) {
-        const fullUrl = `https://pastebin-lite--rohinilon875.replit.app/p/${data.id}`;
-        setPasteUrl(fullUrl);
-      } else {
-        alert("Paste created but ID not returned");
+        if (response.ok) break;
+      } catch (e) {
+        await new Promise((res) => setTimeout(res, 4000));
       }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to connect to backend");
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (!response || !response.ok) {
+      alert("Backend is waking up. Please click Create Paste again.");
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data?.id) {
+      setPasteUrl(`${backendBase}/p/${data.id}`);
+    } else {
+      alert("Unexpected backend response");
+    }
+  } catch (err) {
+    alert("Backend unavailable. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <div className="app-container">
@@ -67,7 +83,6 @@ function App() {
         {pasteUrl && (
           <div className="result">
             <strong>Paste created:</strong>
-            <br />
             <a href={pasteUrl} target="_blank" rel="noreferrer">
               {pasteUrl}
             </a>
